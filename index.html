@@ -366,19 +366,32 @@
             btnOpen.on('click', open);
             btnReset.on('click', close);
 
-            letter.on('mousedown', function(e) {
-                let offsetX = e.clientX - letter.offset().left;
-                let offsetY = e.clientY - letter.offset().top;
+            // Dragging functionality
+            let isDragging = false;
+            let offsetX, offsetY;
 
-                $(document).on('mousemove', function(e) {
-                    letter.css({
-                        top: e.clientY - offsetY,
-                        left: e.clientX - offsetX
-                    });
+            letter.on('touchstart mousedown', function(e) {
+                e.preventDefault();
+                isDragging = true;
+
+                offsetX = e.type === 'mousedown' ? e.clientX - letter.offset().left : e.originalEvent.touches[0].clientX - letter.offset().left;
+                offsetY = e.type === 'mousedown' ? e.clientY - letter.offset().top : e.originalEvent.touches[0].clientY - letter.offset().top;
+
+                $(document).on('mousemove touchmove', function(e) {
+                    if (isDragging) {
+                        let x = e.type === 'mousemove' ? e.clientX : e.originalEvent.touches[0].clientX;
+                        let y = e.type === 'mousemove' ? e.clientY : e.originalEvent.touches[0].clientY;
+
+                        letter.css({
+                            left: x - offsetX,
+                            top: y - offsetY
+                        });
+                    }
                 });
 
-                $(document).on('mouseup', function() {
-                    $(document).off('mousemove mouseup');
+                $(document).on('mouseup touchend', function() {
+                    isDragging = false;
+                    $(document).off('mousemove touchmove mouseup touchend');
                 });
             });
 
